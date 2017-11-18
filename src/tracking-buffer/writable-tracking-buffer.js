@@ -31,7 +31,7 @@ module.exports = class WritableTrackingBuffer {
     const length = buffer.length;
     this.makeRoomFor(length);
     buffer.copy(this.buffer, this.position);
-    return this.position += length;
+    this.position += length;
   }
 
   makeRoomFor(requiredLength) {
@@ -41,9 +41,9 @@ module.exports = class WritableTrackingBuffer {
         while (size < requiredLength) {
           size *= 2;
         }
-        return this.newBuffer(size);
+        this.newBuffer(size);
       } else {
-        return this.newBuffer(requiredLength);
+        this.newBuffer(requiredLength);
       }
     }
   }
@@ -56,32 +56,32 @@ module.exports = class WritableTrackingBuffer {
       this.compositeBuffer = buffer;
     }
     this.buffer = (size === 0) ? ZERO_LENGTH_BUFFER : new Buffer(size);
-    return this.position = 0;
+    this.position = 0;
   }
 
   writeUInt8(value) {
     const length = 1;
     this.makeRoomFor(length);
     this.buffer.writeUInt8(value, this.position);
-    return this.position += length;
+    this.position += length;
   }
 
   writeUInt16LE(value) {
     const length = 2;
     this.makeRoomFor(length);
     this.buffer.writeUInt16LE(value, this.position);
-    return this.position += length;
+    this.position += length;
   }
 
   writeUShort(value) {
-    return this.writeUInt16LE(value);
+    this.writeUInt16LE(value);
   }
 
   writeUInt16BE(value) {
     const length = 2;
     this.makeRoomFor(length);
     this.buffer.writeUInt16BE(value, this.position);
-    return this.position += length;
+    this.position += length;
   }
 
   writeUInt24LE(value) {
@@ -90,86 +90,86 @@ module.exports = class WritableTrackingBuffer {
     this.buffer[this.position + 2] = (value >>> 16) & 0xff;
     this.buffer[this.position + 1] = (value >>> 8) & 0xff;
     this.buffer[this.position] = value & 0xff;
-    return this.position += length;
+    this.position += length;
   }
 
   writeUInt32LE(value) {
     const length = 4;
     this.makeRoomFor(length);
     this.buffer.writeUInt32LE(value, this.position);
-    return this.position += length;
+    this.position += length;
   }
 
   writeInt64LE(value) {
     const buf = bigint.numberToInt64LE(value);
-    return this.copyFrom(buf);
+    this.copyFrom(buf);
   }
 
   writeUInt32BE(value) {
     const length = 4;
     this.makeRoomFor(length);
     this.buffer.writeUInt32BE(value, this.position);
-    return this.position += length;
+    this.position += length;
   }
 
   writeUInt40LE(value) {
     // inspired by https://github.com/dpw/node-buffer-more-ints
     this.writeInt32LE(value & -1);
-    return this.writeUInt8(Math.floor(value * SHIFT_RIGHT_32));
+    this.writeUInt8(Math.floor(value * SHIFT_RIGHT_32));
   }
 
   writeUInt64LE(value) {
     this.writeInt32LE(value & -1);
-    return this.writeUInt32LE(Math.floor(value * SHIFT_RIGHT_32));
+    this.writeUInt32LE(Math.floor(value * SHIFT_RIGHT_32));
   }
 
   writeInt8(value) {
     const length = 1;
     this.makeRoomFor(length);
     this.buffer.writeInt8(value, this.position);
-    return this.position += length;
+    this.position += length;
   }
 
   writeInt16LE(value) {
     const length = 2;
     this.makeRoomFor(length);
     this.buffer.writeInt16LE(value, this.position);
-    return this.position += length;
+    this.position += length;
   }
 
   writeInt16BE(value) {
     const length = 2;
     this.makeRoomFor(length);
     this.buffer.writeInt16BE(value, this.position);
-    return this.position += length;
+    this.position += length;
   }
 
   writeInt32LE(value) {
     const length = 4;
     this.makeRoomFor(length);
     this.buffer.writeInt32LE(value, this.position);
-    return this.position += length;
+    this.position += length;
   }
 
   writeInt32BE(value) {
     const length = 4;
     this.makeRoomFor(length);
     this.buffer.writeInt32BE(value, this.position);
-    return this.position += length;
+    this.position += length;
   }
 
   writeFloatLE(value) {
     const length = 4;
     this.makeRoomFor(length);
     this.buffer.writeFloatLE(value, this.position);
-    return this.position += length;
+    this.position += length;
   }
 
   writeDoubleLE(value) {
     const length = 8;
     this.makeRoomFor(length);
     this.buffer.writeDoubleLE(value, this.position);
-    return this.position += length;
+    this.position += length;
   }
 
   writeString(value, encoding) {
@@ -178,20 +178,18 @@ module.exports = class WritableTrackingBuffer {
     const length = Buffer.byteLength(value, encoding);
     this.makeRoomFor(length);
 
-    const bytesWritten = this.buffer.write(value, this.position, encoding);
+    this.buffer.write(value, this.position, encoding);
     this.position += length;
-
-    return bytesWritten;
   }
 
   writeBVarchar(value, encoding) {
     this.writeUInt8(value.length);
-    return this.writeString(value, encoding);
+    this.writeString(value, encoding);
   }
 
   writeUsVarchar(value, encoding) {
     this.writeUInt16LE(value.length);
-    return this.writeString(value, encoding);
+    this.writeString(value, encoding);
   }
 
   writeUsVarbyte(value, encoding) {
@@ -209,11 +207,11 @@ module.exports = class WritableTrackingBuffer {
     this.writeUInt16LE(length);
 
     if (Buffer.isBuffer(value)) {
-      return this.writeBuffer(value);
+      this.writeBuffer(value);
     } else {
       this.makeRoomFor(length);
       this.buffer.write(value, this.position, encoding);
-      return this.position += length;
+      this.position += length;
     }
   }
 
@@ -249,18 +247,18 @@ module.exports = class WritableTrackingBuffer {
     }
 
     // PLP_TERMINATOR (no more chunks).
-    return this.writeUInt32LE(0);
+    this.writeUInt32LE(0);
   }
 
   writeBuffer(value) {
     const length = value.length;
     this.makeRoomFor(length);
     value.copy(this.buffer, this.position);
-    return this.position += length;
+    this.position += length;
   }
 
   writeMoney(value) {
     this.writeInt32LE(Math.floor(value * SHIFT_RIGHT_32));
-    return this.writeInt32LE(value & -1);
+    this.writeInt32LE(value & -1);
   }
 };

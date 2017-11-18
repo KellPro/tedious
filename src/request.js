@@ -15,10 +15,10 @@ module.exports = class Request extends EventEmitter {
     this.callback = function() {
       if (this.preparing) {
         this.emit('prepared');
-        return this.preparing = false;
+        this.preparing = false;
       } else {
         this.userCallback.apply(this, arguments);
-        return this.emit('requestCompleted');
+        this.emit('requestCompleted');
       }
     };
   }
@@ -38,7 +38,7 @@ module.exports = class Request extends EventEmitter {
       scale: options.scale
     };
     this.parameters.push(parameter);
-    return this.parametersByName[name] = parameter;
+    this.parametersByName[name] = parameter;
   }
 
   addOutputParameter(name, type, value, options) {
@@ -46,7 +46,7 @@ module.exports = class Request extends EventEmitter {
       options = {};
     }
     options.output = true;
-    return this.addParameter(name, type, value, options);
+    this.addParameter(name, type, value, options);
   }
 
   makeParamsParameter(parameters) {
@@ -81,7 +81,7 @@ module.exports = class Request extends EventEmitter {
       const parameter = this.originalParameters[i];
       this.parameters.push(parameter);
     }
-    return this.sqlTextOrProcedure = 'sp_executesql';
+    this.sqlTextOrProcedure = 'sp_executesql';
   }
 
   transformIntoPrepareRpc() {
@@ -92,11 +92,11 @@ module.exports = class Request extends EventEmitter {
     this.addParameter('stmt', TYPES.NVarChar, this.sqlTextOrProcedure);
     this.sqlTextOrProcedure = 'sp_prepare';
     this.preparing = true;
-    return this.on('returnValue', (name, value) => {
+    this.on('returnValue', (name, value) => {
       if (name === 'handle') {
-        return this.handle = value;
+        this.handle = value;
       } else {
-        return this.error = RequestError('Tedious > Unexpected output parameter ' + name + ' from sp_prepare');
+        this.error = RequestError(`Tedious > Unexpected output parameter ${name} from sp_prepare`);
       }
     });
   }
@@ -104,7 +104,7 @@ module.exports = class Request extends EventEmitter {
   transformIntoUnprepareRpc() {
     this.parameters = [];
     this.addParameter('handle', TYPES.Int, this.handle);
-    return this.sqlTextOrProcedure = 'sp_unprepare';
+    this.sqlTextOrProcedure = 'sp_unprepare';
   }
 
   transformIntoExecuteRpc(parameters) {
@@ -121,7 +121,7 @@ module.exports = class Request extends EventEmitter {
       return;
     }
 
-    return this.sqlTextOrProcedure = 'sp_execute';
+    this.sqlTextOrProcedure = 'sp_execute';
   }
 
   validateParameters() {
